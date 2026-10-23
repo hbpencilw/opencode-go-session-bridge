@@ -380,6 +380,10 @@ function translateChatStream(upRes, res, model) {
 const server = http.createServer(async (req, res) => {
   const started = Date.now();
   const inPath = req.url || '/';
+  // 精确计时：记录从收到请求到响应完全结束的总时长（SSE 为流结束时刻），用于延迟验收
+  res.on('finish', () => {
+    if (inPath !== '/healthz') L.info(`[done] ${req.method} ${inPath} -> ${res.statusCode} total=${Date.now() - started}ms`);
+  });
 
   // 本机健康检查：GET /healthz
   if (inPath === '/healthz') {
