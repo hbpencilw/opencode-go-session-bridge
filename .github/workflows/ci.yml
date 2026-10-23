@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['20', '22', '26']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: 语法检查
+        run: node --check proxy.mjs
+
+      - name: 冒烟测试（health / upstream / 会话注入）
+        run: |
+          set -e
+          node proxy.mjs --port 14731 --capture &
+          PROXY_PID=$!
+          sleep 1
+
+          echo "== T1 healthz =="
+          curl -fsS --noproxy '*' http://127.0.0.1:14731/healthz
+
+          echo "== T2 上游连通（GET /v1/models，期望 200）=="
+          code=$(curl -s --noproxy '*' -o /dev/null -w '%{http_code}' http://127.0.0.1:14731/v1/models)
+          echo "HTTP $code"
+          [ "$code" = "200" ]
+
+          echo "== T4 会话注入（假 Key POST，期望上游 401 而非 400 MissingSessionID）=="
+          code=$(curl -s --noproxy '*' -o /dev/null -w '%{http_code}' -X POST \
+            http://127.0.0.1:14731/v1/chat/completions \
+            -H 'content-type: application/json' \
+            -H 'authorization: Bearer sk-invalid-on-purpose' \
+            -d '{"model":"glm-5.3-flash","messages":[{"role":"user","content":"ping"}]}')
+          echo "HTTP $code"
+          [ "$code" = "401" ]
+
+          kill "$PROXY_PID" 2>/dev/null || true
