@@ -10,7 +10,7 @@
 
 | 客户端 | 版本 | 验证来源 | 说明 |
 |---|---|---|---|
-| VS Code GitHub Copilot Chat | 1.140（CopilotChat 0.69.0） | **本项目实测**（2026-10-10，44 条请求） | 三模型全链路 200 / SSE 流式；`MissingSessionID` 消失 |
+| VS Code GitHub Copilot Chat | 1.140（CopilotChat 0.69–0.71） | **本项目实测**（2026-10-10，44 条请求；2026-10-23 复测 4 条） | 三模型全链路 200 / SSE 流式；`MissingSessionID` 消失；DeepSeek 短问答 TTFB 2.2–3.0s、总时长 2.3–4.0s（107KB 请求体 / 23 工具） |
 | GitHub Copilot 网页版 Custom endpoint | Model providers（BYOK） | **本项目实测**（2026-10-12，3 条请求） | UA `OpenAI/JS 5.20.1`，请求从本机发出（非云端中转）；77 工具 / 167KB 请求体 / 200 SSE；Base URL 填 `http://127.0.0.1:14731/v1`、Wire API=completions、填 OpenCode Go Key |
 | Trae | 3.6.1 | **本项目实测**（2026-10-10，15 条请求） | UA 为 `hertz`；请求不带 `x-interaction-id` → 会话走按模型常量退路 |
 | Hermes | v0.21.6+ | 官方文档 Validated（PR #101864） | 该版本起在主/辅助 OpenCode 请求上发送 session 头 |
