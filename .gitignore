@@ -1,0 +1,19 @@
+# 运行时产物（绝不入库）
+*.log
+capture.jsonl
+session-secret.key
+proxy.pid
+
+# 本地私有文件（对话存档、验收报告、第三方参考项目等）
+local/
+
+# 环境与系统文件
+.env
+.DS_Store
+.zcodeignore
+
+# 依赖目录（本项目零依赖，防御性保留）
+node_modules/
+
+# TODO: CI 通过网页添加后删除下面这行（workflow 权限限制的临时规避）
+.github/workflows/ci.yml

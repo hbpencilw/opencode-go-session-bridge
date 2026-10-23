@@ -1,0 +1,36 @@
+{
+  "name": "opencode-go-session-bridge",
+  "version": "0.0.1",
+  "description": "Local lightweight bridge that injects/preserves the x-opencode-session header for coding agents (VS Code Copilot Chat, Trae, ...) talking to OpenCode Go (Zen API). 本地轻量桥接代理：为 coding agent 补齐/保留 x-opencode-session 会话头，透明转发 OpenCode Go。",
+  "type": "module",
+  "main": "proxy.mjs",
+  "scripts": {
+    "start": "bash start.sh",
+    "stop": "bash stop.sh",
+    "test": "bash test.sh health && bash test.sh upstream"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-go",
+    "x-opencode-session",
+    "proxy",
+    "bridge",
+    "coding-agent",
+    "trae",
+    "copilot",
+    "sse"
+  ],
+  "author": "hbpencilw",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hbpencilw/opencode-go-session-bridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hbpencilw/opencode-go-session-bridge/issues"
+  },
+  "homepage": "https://github.com/hbpencilw/opencode-go-session-bridge#readme"
+}

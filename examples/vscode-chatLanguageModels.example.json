@@ -1,0 +1,36 @@
+{
+  "//": "VS Code 自定义模型（BYOK）配置示例 —— OpenCode Go 分组。放到 ~/Library/Application Support/Code/User/chatLanguageModels.json。⚠️ apiKey 必须使用 VS Code SecretStorage 的 ${input:...} 引用（密钥只在加密存储中），不要写明文。",
+  "name": "OpenCode Go",
+  "vendor": "customendpoint",
+  "apiKey": "${input:chat.lm.secret.<your-secret-id>}",
+  "apiType": "chat-completions",
+  "models": [
+    {
+      "id": "deepseek-v4.1-flash",
+      "name": "DeepSeek V4.1 Flash",
+      "url": "http://127.0.0.1:14731/v1/chat/completions",
+      "toolCalling": true,
+      "vision": true,
+      "maxInputTokens": 128000,
+      "maxOutputTokens": 16000
+    },
+    {
+      "id": "glm-5.3-flash",
+      "name": "GLM-5.3-Flash",
+      "url": "http://127.0.0.1:14731/v1/chat/completions",
+      "toolCalling": true,
+      "vision": true,
+      "maxInputTokens": 128000,
+      "maxOutputTokens": 16000
+    },
+    {
+      "id": "mimo-v2.6-flash",
+      "name": "MiMo-V2.6-Flash",
+      "url": "http://127.0.0.1:14731/v1/chat/completions",
+      "toolCalling": true,
+      "vision": true,
+      "maxInputTokens": 128000,
+      "maxOutputTokens": 16000
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+name: Bug 反馈
+description: 报告代理或客户端兼容性问题
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请先看 [故障排查文档](../blob/main/docs/troubleshooting.md)。
+        ⚠️ **请勿粘贴 API Key、Authorization 头或对话内容**；日志只贴脱敏后的部分。
+  - type: input
+    id: client
+    attributes:
+      label: 客户端及版本
+      description: 例如 VS Code 1.140 / Trae 3.6.1 / Codex CLI …
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: 报错原文（脱敏）
+      description: 完整错误信息（可去掉 Client Request Id）
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 从代理启动到报错的完整步骤
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: 代理日志尾部（脱敏）
+      description: "`tail -40 proxy.log`（手动实例）或 `~/.local/state/opencode-go-session-bridge/proxy.log`（launchd 实例）"
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 自查
+      options:
+        - label: 代理进程在运行（healthz 通过）
+          required: true
+        - label: 我已确认未泄露任何密钥或对话内容
+          required: true
