@@ -133,6 +133,12 @@ const hash12 = (v) => (v ? crypto.createHash('sha256').update(String(v)).digest(
 const REDACTED_HEADERS = new Set([
   'authorization', 'api-key', 'x-api-key', 'cookie', 'proxy-authorization', 'x-opencode-session',
 ]);
+// ---------- 错误日志 ----------
+// 记录上游 4xx/5xx 响应体（截断）与连接类错误，便于排障；不含请求体/对话内容/密钥。
+const ERR_LOG = path.join(DATA_DIR, 'errors.log');
+function logUpstreamError(entry) {
+  try { fs.appendFileSync(ERR_LOG, JSON.stringify(entry) + '\n'); } catch { /* 日志失败不影响转发 */ }
+}
 
 // hop-by-hop 与不得转发的头
 const HOP_BY_HOP = new Set([
@@ -512,6 +518,27 @@ const server = http.createServer(async (req, res) => {
     const isSSE = /text\/event-stream/i.test(upRes.headers['content-type'] || '');
     if (isSSE) delete outHeaders['content-length'];
 
+    // 上游 4xx/5xx：缓冲错误体（很小）→ 记录到 errors.log / 代理日志 → 原样转发给客户端
+    if (upRes.statusCode >= 400) {
+      let ebody = '';
+      upRes.setEncoding('utf8');
+      upRes.on('data', (c) => { if (ebody.length < 65536) ebody += c; });
+      upRes.on('end', () => {
+        const snippet = ebody.replace(/\s+/g, ' ').trim().slice(0, 512);
+        L.info(`[upstream-error] ${req.method} ${inPath} model=${bodyMeta.model} -> ${upRes.statusCode} body=${snippet}`);
+        logUpstreamError({
+          ts: new Date().toISOString(), method: req.method, path: inPath,
+          model: bodyMeta.model, status: upRes.statusCode, body: ebody.slice(0, 4096),
+        });
+        outHeaders['content-length'] = String(Buffer.byteLength(ebody, 'utf8'));
+        delete outHeaders['transfer-encoding'];
+        res.writeHead(upRes.statusCode, outHeaders);
+        res.end(ebody);
+      });
+      upRes.on('error', () => res.destroy());
+      return;
+    }
+
     L.info(`${req.method} ${inPath} model=${bodyMeta.model} stream=${bodyMeta.stream} -> ${upRes.statusCode} sess=${session.source}(${hash12(session.value)}) ${Date.now() - started}ms`);
     res.writeHead(upRes.statusCode, outHeaders);
     res.flushHeaders?.();
@@ -522,6 +549,8 @@ const server = http.createServer(async (req, res) => {
   upReq.on('timeout', () => { upReq.destroy(new Error('upstream timeout')); });
   upReq.on('error', (err) => {
     if (L.cap) L.cap({ ts: new Date().toISOString(), kind: 'upstream-error', path: inPath, model: bodyMeta.model, message: err.message });
+    L.info(`[upstream-error] ${req.method} ${inPath} model=${bodyMeta.model} conn=${err.code || err.message}`);
+    logUpstreamError({ ts: new Date().toISOString(), method: req.method, path: inPath, model: bodyMeta.model, status: 0, error: err.message, code: err.code || null });
     if (!res.headersSent) {
       const code = err.code === 'ENOTFOUND' || err.code === 'EAI_AGAIN' ? 504 : 502;
       res.writeHead(code, { 'content-type': 'application/json; charset=utf-8' });

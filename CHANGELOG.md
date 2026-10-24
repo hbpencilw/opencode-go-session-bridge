@@ -15,6 +15,7 @@
   - 安全默认：仅监听 `127.0.0.1`、上游白名单（仅 `https://opencode.ai/zen/go/v1/*`）、日志脱敏（不记录 API Key / Authorization / 请求体 / 对话内容）；
   - **Responses API 兼容层（Codex 2026 必需）**：桥接自动把客户端发往 `/v1/responses` 的请求翻译为上游 `/v1/chat/completions`，并将响应翻译回 Responses 格式（含 SSE 事件流：output_text.delta / function_call_arguments.delta / response.completed，支持工具调用）；背景：Codex 2026 只支持 `wire_api="responses"`，而 OpenCode Go 的 `/responses` 后端实测返回 503 Endpoint is unavailable；
 - **模型名防御性规范化**（`normalizeModelId`）：转发前统一剥离客户端装饰前缀——`proxy-<真实名>`（Trae 重名劫持应对）与 `<uuid>/<真实名>`（GitHub Copilot 网页版 provider 前缀）——还原上游真实模型 ID；转发、日志、会话派生均使用规范化后的 ID；
+- **错误日志**（`errors.log`）：上游 4xx/5xx 的完整错误响应体（截断至 4KB，脱敏）与连接类错误逐行记录，代理日志同步输出 `[upstream-error]` 摘要行——排障不再需要猜错误内容；
 - 脱敏观测模式（`--capture` / `OPENCODE_GO_PROXY_CAPTURE=1`），只记头部名、路径、模型、结构统计与非敏感头哈希。
 - **运维脚本**：`start.sh`（launchd 托管 + nohup 兜底，幂等）、`stop.sh`、`test.sh`（health / upstream / text / stream / image / session 六项冒烟测试，无 Key 可跑前两项）。
 - **macOS launchd 托管**：`scripts/install-launchagent.sh`（登录自启 + KeepAlive；自动规避 `~/Documents` TCC 限制，数据目录默认 `~/.local/state/opencode-go-session-bridge/`）。
