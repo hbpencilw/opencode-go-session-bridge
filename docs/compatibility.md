@@ -65,6 +65,20 @@ wire_api = "responses"
 
 配置里勾选 vision/toolCalling 只代表客户端能力声明；图片识别、工具调用是否真正可用取决于上游模型的实际支持，未经端到端测试前请勿视为已验证。
 
+### VS Code Agent Host 界面：不支持 BYOK 自定义端点模型（2026-10-24 实测）
+
+VS Code 1.140+ 的 **Agent Host 界面**（Sessions/Automations 侧栏、`agent-host-copilotcli`，即"agent 面板"）把模型请求**交给 GitHub Copilot 后端执行**，后端不支持 BYOK 自定义端点模型：选择 `customendpoint/OpenCode Go/...` 会被直接拒绝：
+
+```
+400 {"error":{"message":"The requested model is not supported.","code":"model_not_supported","param":"model","type":"invalid_request_error"}}
+```
+
+**请求不会经过本地桥接**（桥接日志无记录，`agenthost.log` 可见模型已正确传入但被后端拒绝）。这不是配置问题、也不是桥接问题——属 GitHub 侧限制。**OpenCode Go 模型请在经典 Copilot Chat 聊天面板中使用**（该面板本机直发、实测可用）。
+
+### VS Code：`vision: true` 只是能力声明
+
+配置里勾选 vision/toolCalling 只代表客户端能力声明；图片识别、工具调用是否真正可用取决于上游模型的实际支持，未经端到端测试前请勿视为已验证。
+
 ### GitHub Copilot 网页版：UI 显示的模型 ID 带 UUID 前缀，但请求体里是干净的
 
 在 Copilot 网页版 Model providers 里，自定义模型的**显示名**会是 `<uuid>/<真实模型名>`（如 `b82dec58-.../mimo-v2.6-flash`），但**实际请求体的 model 字段是干净的真实模型名**（实测 200）。为健壮起见，本代理仍会对带 `uuid/` 或 `proxy-` 前缀的 model 做防御性规范化（`normalizeModelId`），即使某个客户端真把前缀发进来也能正确转发。延迟方面：该入口未暴露关思考的开关，思考型模型（如 MiMo 默认开 reasoning）对一句简单提问也可能 `Thought for 14s`，属模型固有开销而非代理问题。
