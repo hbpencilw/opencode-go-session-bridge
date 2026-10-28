@@ -1,0 +1,1 @@
+placeholder: keeps the stale harness cwd valid; will be removed once shell cwd updates

@@ -65,6 +65,16 @@ wire_api = "responses"
 
 配置里勾选 vision/toolCalling 只代表客户端能力声明；图片识别、工具调用是否真正可用取决于上游模型的实际支持，未经端到端测试前请勿视为已验证。
 
+### ZCode：文件附件可能因 `file` 部件缺字段被上游拒绝（2026-10-28 实测）
+
+ZCode（内置 `opencode-go-chat` 直连通道）在会话中附加文件后，可能把附件序列化为不完整的 `file` 部件（只有 `type`/`file`，缺 `file_id` 或 `file_data`），上游直接 400：
+
+```
+Upstream request failed: [invalid_request_error] .messages[N]: file must have a file_id or file_data
+```
+
+**影响**：该会话的历史每轮都会重发这段坏数据，导致**该会话后续所有请求都失败**——必须在 ZCode 里**新建会话**。规避：改用图片附件（`image_url` 部件正常）、把文件内容作为文本发送，或使用 OpenCode 原生客户端（其附件协议支持 `file://` / `data:` URI，见官方 Attachments 文档）。属 ZCode 客户端序列化问题，与桥接、配额无关。
+
 ### VS Code Agent Host 界面：不支持 BYOK 自定义端点模型（2026-10-24 实测）
 
 VS Code 1.140+ 的 **Agent Host 界面**（Sessions/Automations 侧栏、`agent-host-copilotcli`，即"agent 面板"）把模型请求**交给 GitHub Copilot 后端执行**，后端不支持 BYOK 自定义端点模型：选择 `customendpoint/OpenCode Go/...` 会被直接拒绝：
