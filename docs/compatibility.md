@@ -29,8 +29,8 @@
 |---|---|---|---|
 | DeepSeek Harness | Session 头仅部分模型路径到达，其他路径缺失；已识别其原生 header，剩余工作是在所有适配器统一发送 | Discussion [#5495](https://github.com/anomalyco/opencode/discussions/5495) | |
 | GitHub Copilot Chat | 自定义模型通道不发送 `x-opencode-session`；自动 session-header 支持已提出请求 | VS Code issue [#334186](https://github.com/microsoft/vscode/issues/334186) | 本项目的最初动机；1.140 实测经由本代理可完全正常 |
-| Kimi Code | 自动 session-header 支持请求中 | issue [#3506](https://github.com/…/issues/3506) | |
-| MiMo Code | 已有 proposed fix | issue [#2317](https://github.com/…/issues/2317)、PR [#2327](https://github.com/…/pull/2327)（尚未合并） | 合并前仍需本代理 |
+| Kimi Code | 原生 session-header 支持请求**已关闭（not planned）** | issue [#3506](https://github.com/…/issues/3506)（closed） | 不会再获得原生支持 → 桥接是唯一方案 |
+| MiMo Code | **issue 已关闭，proposed PR 未合并** | issue [#2317](https://github.com/…/issues/2317)（closed）、PR [#2327](https://github.com/…/pull/2327)（closed） | 不会再获得原生支持 → 桥接是唯一方案 |
 
 > issue/Discussion 编号与状态以各官方仓库的实时页面为准；如发现编号有误或已合并，欢迎提 Issue/PR 修正。
 
